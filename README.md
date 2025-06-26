@@ -13,7 +13,7 @@ A Node.js application for automating scheduled emails using a customizable sched
 - ## 🔧 Installation
 
 git clone https://github.com/afwanlatif/Automated_Email_Scheduler.git
-cd automated_email_scheduler
+cd Automated_Email_Scheduler
 npm install
 
 

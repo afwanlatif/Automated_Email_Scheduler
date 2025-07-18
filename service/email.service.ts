@@ -1,17 +1,8 @@
 import transporter from "../config/mailer.config";
 import envConfig from "../config/env.config";
 import { EmailHistoryModel } from "../model/email.history.model";
-import { subDays } from "date-fns";
 import { EmailResult } from '../types';
-
-const checkEmailLimit = async (email: string): Promise<Boolean> => {
-    const threeDaysAgo: Date = subDays(new Date(), 3);
-    const emailCount: number = await EmailHistoryModel.countDocuments({
-        email: email,
-        sentAt: { $gte: threeDaysAgo }
-    });
-    return emailCount >= envConfig.email_shoot
-};
+import { checkEmailLimit, incrementEmailCount } from "../helper/index";
 
 const sendEmail = async (
     to: string,
@@ -21,15 +12,20 @@ const sendEmail = async (
     firstName: string | null = null
 ): Promise<EmailResult> => {
     try {
-        // Check email limit before sending
-        const limitExceeded: Boolean = await checkEmailLimit(to);
+        // Check if an email with the same content already exists
+        const existingEmail = await EmailHistoryModel.findOne({ 
+            email: to,
+            subject: subject,
+            text: text
+        });
+
+        // Always check email limit before sending, regardless of content
+        const limitExceeded: boolean = await checkEmailLimit(to);
         if (limitExceeded) {
             return { success: false, message: `Email limit exceeded for ${to} (max 2 emails in 3 days)` };
         }
 
-        // Get current count for this email
-        const currentCount: number = await EmailHistoryModel.countDocuments({ email: to }) + 1;
-
+        // Send the email
         const mailOptions = {
             from: envConfig.user_email,
             to: to,
@@ -37,24 +33,30 @@ const sendEmail = async (
             text: text,
             attachments: attachments
         };
-
         const info = await transporter.sendMail(mailOptions);
 
-        // Record email in history with content and count
-        await EmailHistoryModel.create({
-            email: to,
-            firstName: firstName,
-            subject: subject,
-            text: text,
-            count: currentCount
-        });
+        // Increment the total email count for this recipient
+        await incrementEmailCount(to);
 
-        console.log('Email sent:', info.response);
+        // Update or create content-specific email history record
+        if (existingEmail) {
+            await EmailHistoryModel.findByIdAndUpdate(existingEmail._id, {
+                sentAt: new Date() // Just update the sent date
+            });
+        } else {
+            await EmailHistoryModel.create({
+                email: to,
+                firstName: firstName,
+                subject: subject,
+                text: text
+            });
+        }
+
         return { success: true, message: `Email sent to ${to}`, info };
     } catch (error: unknown) {
         console.error(error);
         return { success: false, message: `Error sending to ${to}`, error: error as Error };
-    };
+    }
 };
 
 

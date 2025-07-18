@@ -5,7 +5,6 @@ const emailHistorySchema = new mongoose.Schema({
     firstName: { type: String },
     subject: { type: String, required: true },
     text: { type: String, required: true },
-    count: { type: Number, required: true },
     sentAt: { type: Date, default: Date.now }
 });
 

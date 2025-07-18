@@ -93,8 +93,17 @@ export interface SessionResponse {
     };
 }
 
-// export interface PendingLogin {
-//     email: string;
-//     otp: string;
-//     expiresAt: Date;
-// }
+export interface SendEmailAPIRequest  {
+    firstName?: string;
+    email: string;
+    subject: string;
+    text: string
+}
+
+import { Document } from 'mongoose';
+
+export interface EmailCounter extends Document {
+    email: string;
+    totalCount: number;
+    lastReset: Date;
+}

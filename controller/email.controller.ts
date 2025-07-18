@@ -4,7 +4,7 @@ import { UserModel } from "../model/user.model";
 import sendEmail from "../service/email.service";
 import { Request, Response } from 'express';
 import fs from 'fs';
-import { User, FileDoc, Attachment } from '../types';
+import { User, FileDoc, Attachment, SendEmailAPIRequest } from '../types';
 import { EmailHistoryModel } from "../model/email.history.model";
 
 // Shot According to the cron-job (scheduler) ok 
@@ -48,7 +48,7 @@ export const sendDailyEmails = async () => {
 // Shots Manually through Postman avoid (cron-job)
 export const sendEmailAPI = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { firstName, email, subject, text }: { firstName?: string; email: string; subject: string; text: string } = req.body;
+        const { firstName, email, subject, text }: SendEmailAPIRequest = req.body;
         if (!email || !subject || !text) {
             res.status(400).json({ message: "Email, subject, and text are required fields" });
             return

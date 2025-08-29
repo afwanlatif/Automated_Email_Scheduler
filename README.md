@@ -251,6 +251,6 @@ Emails are personalized using templates defined in `/constants/text.constant.ts`
 
 ## 👨‍💻 Author
 
-Developed with ❤️ by Afwan Latif(Backend Developer) under the support of Saqlain Ansari(fullStack Developer)
+Developed with ❤️ by Afwan Latif Backend Developer (Node.js)
 
 **Note**: This application is designed for educational and development purposes. Ensure compliance with email marketing regulations and privacy laws when using in production.
